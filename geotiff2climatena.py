@@ -1,11 +1,11 @@
-import click
 import csv
-import fiona
-import numpy
 import os
-import rasterio
 import sys
 
+import click
+import fiona
+import numpy
+import rasterio
 from numpy.ma import is_masked
 from pyproj import Proj, transform
 from rasterio.features import rasterize
@@ -47,7 +47,8 @@ def main(in_file, out_file, boundary):
             for i, feature in enumerate(features):
                 geometry = transform_geom(shp.crs, {'init': 'EPSG:4326'}, feature[1]['geometry'])
                 mask |= rasterize(
-                    ((geometry, 1),), out_shape=mask.shape, transform=affine, fill=1, dtype=numpy.dtype('uint8')
+                    ((geometry, 1),), out_shape=mask.shape, transform=affine, fill=0, dtype=numpy.dtype('uint8'),
+                    default_value=1
                 )
 
                 print('Masking DEM... ({}%)'.format(round(i / float(num_features) * 100)), end='\r')
@@ -56,7 +57,6 @@ def main(in_file, out_file, boundary):
             grid = numpy.ma.masked_where(mask == 0, grid)
 
     print('Writing CSV...')
-    print((grid.mask == False).any())
     with open(out_file, 'w') as f_out:
         csv_file = csv.writer(f_out)
         csv_file.writerow(['ID1', 'ID2', 'Lat', 'Lon', 'El'])
@@ -71,7 +71,7 @@ def main(in_file, out_file, boundary):
 
             # Todo: adjust to center of cell?
 
-            csv_file.writerow([row, col, y, x, value])
+            csv_file.writerow([row, col, round(y, 7), round(x, 7), value])
 
     print('Done.')
 
