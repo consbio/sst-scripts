@@ -19,4 +19,4 @@ Data processing scripts related to the Seedlot Selection Tool
 6. Run the `climatena2netcdf.py` script to convert each of your ClimateNA outputs to NetCDF  
   `$ python climatena2netcdf.py path/to/clipped_dem.tif path/to/climatena_output.csv path/to/netcdf/dir`  
 7. If needed, run the `cut_to_region.py` script to clip the NetCDF datasets from the previous step to smaller regions. Since you will have one NetCDF per variable, use `{variable}` to note where in the filename the variable is; the script will clip each NetCDF matching the file pattern.  
-  `$ python path/to/full_netcdf_{variable}.nc path/to/clipped_netcdf_{variable}.nc`
+  `$ python cut_to_region.py path/to/full_netcdf_{variable}.nc path/to/clipped_netcdf_{variable}.nc`
