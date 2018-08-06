@@ -5,16 +5,16 @@ from io import StringIO
 import click
 import numpy
 import rasterio
-from clover.geometry.bbox import BBox
-from clover.netcdf.crs import set_crs
-from clover.netcdf.variable import SpatialCoordinateVariables
-from netCDF4._netCDF4 import Dataset
+from trefoil.geometry.bbox import BBox
+from trefoil.netcdf.crs import set_crs
+from trefoil.netcdf.variable import SpatialCoordinateVariables
+from netCDF4 import Dataset
 from pyproj import Proj
 
 VARIABLES = [
     ('MAT', True), ('MWMT', True), ('MCMT', True), ('TD', True), ('MAP', False), ('MSP', False), ('AHM', True),
-    ('SHM', True), ('DD_0', False), ('DD5', False), ('FFP', False), ('PAS', False), ('EMT', True), ('EXT', True),
-    ('Eref', False), ('CMD', False)
+    ('SHM', True), ('DD_0', False), ('DD5', False), ('DD_18', False), ('bFFP', False), ('eFFP', False), ('FFP', False),
+    ('PAS', False), ('EMT', True), ('EXT', True), ('Eref', False), ('CMD', False)
 ]
 
 
@@ -40,6 +40,9 @@ def main(original_file, climatena_file, out_dir):
         out_path = os.path.join(
             out_dir, '{}_{}.nc'.format(os.path.splitext(os.path.basename(climatena_file))[0], var[0])
         )
+
+        if os.path.exists(out_path):
+            continue
 
         with Dataset(out_path, 'w', format='NETCDF4') as ds:
             projection = Proj('+init=EPSG:4326')
@@ -74,11 +77,14 @@ def main(original_file, climatena_file, out_dir):
             longitudes = arr[1]
 
             for i, var in enumerate(VARIABLES):
-                variable = arr[i + 2]
-
                 out_path = os.path.join(
                     out_dir, '{}_{}.nc'.format(os.path.splitext(os.path.basename(climatena_file))[0], var[0])
                 )
+                if os.path.exists(out_path):
+                    continue
+
+                variable = arr[i + 2]
+
                 with Dataset(out_path, 'a') as ds:
                     grid = ds.variables[var[0]][:]
                     fill_value = grid.fill_value

@@ -32,7 +32,7 @@ def main(in_file, out_file, boundary):
         width = ds.profile['width']
 
     if boundary:
-        mask = numpy.zeros(grid.shape, dtype='uint8')
+        mask = (grid != ds.profile['nodata']).astype('uint8')
 
         with fiona.open(boundary, 'r') as shp:
             grid_projection = Proj('+init=EPSG:4326')

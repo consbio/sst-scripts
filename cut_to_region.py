@@ -4,9 +4,9 @@ import sys
 import click
 import fiona
 import numpy
-from clover.geometry.bbox import BBox
-from clover.netcdf.crs import set_crs
-from clover.netcdf.variable import SpatialCoordinateVariables
+from trefoil.geometry.bbox import BBox
+from trefoil.netcdf.crs import set_crs
+from trefoil.netcdf.variable import SpatialCoordinateVariables
 from netCDF4 import Dataset
 from numpy.ma.core import is_masked
 from pyproj import transform, Proj
@@ -83,8 +83,8 @@ def main(in_pattern, out_pattern, boundary, single, varname):
             x_start, x_stop = coords.x.indices_for_range(bbox.xmin, bbox.xmax)
             y_start, y_stop = coords.y.indices_for_range(bbox.ymin, bbox.ymax)
 
-            x_slice = slice(x_start, x_stop + 1)
-            y_slice = slice(y_start, y_stop + 1)
+            x_slice = slice(x_start, x_stop)
+            y_slice = slice(y_start, y_stop)
 
             clipped_coords = coords.slice_by_bbox(bbox)
 
@@ -106,6 +106,10 @@ def main(in_pattern, out_pattern, boundary, single, varname):
             data_var = ds.createVariable(
                 variable, grid.dtype, dimensions=('latitude', 'longitude'), fill_value=grid.fill_value
             )
+
+            if data_var.shape != grid.shape:
+                grid = grid[:data_var.shape[0], :data_var.shape[1]]
+
             data_var[:] = grid
             set_crs(ds, variable, Proj('+init=EPSG:4326'))
 
